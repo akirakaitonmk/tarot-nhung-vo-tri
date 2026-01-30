@@ -5,21 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aetheris • Modern Tarot</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap");
       body::before {
         content: "";
         position: fixed;
         inset: 0;
-        background-image: radial-gradient(
-          circle at 50% 50%,
-          rgba(34, 211, 238, 0.05) 0%,
-          transparent 10%
-        );
+        background-image: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.05) 0%, transparent 10%);
         background-size: 50px 50px;
         z-index: -1;
       }
@@ -29,27 +30,21 @@
         color: #f8fafc;
         min-height: 100vh;
       }
-
-      /* Glassmorphism lướt mịn */
       .glass-panel {
         background: rgba(15, 23, 42, 0.4);
         backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
-
       .input-style {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
       }
-
       .input-style:focus {
         border-color: #22d3ee;
         background: rgba(255, 255, 255, 0.07);
         box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
       }
-
-      /* Card 3D Flip */
       .card-container {
         perspective: 1500px;
       }
@@ -68,13 +63,10 @@
       .card-back {
         transform: rotateY(180deg);
       }
-
-      /* Animation xuất hiện */
       .fade-up {
         animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
       }
-
       @keyframes fadeUp {
         from {
           opacity: 0;
@@ -87,961 +79,576 @@
           filter: blur(0);
         }
       }
-
-      /* Nút bấm hiệu ứng Gradient */
       .btn-gradient {
         background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
         transition: all 0.4s ease;
       }
-
       .btn-gradient:hover {
         box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
         transform: translateY(-2px);
       }
-
-      ::-webkit-scrollbar {
-        width: 4px;
+      #aiMarkdownOutput {
+        color: #f1f5f9;
+        line-height: 1.7;
+        font-size: 0.95rem;
       }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+      #aiMarkdownOutput h1 {
+        font-size: 1.8rem;
+        color: #22d3ee;
+        font-weight: 700;
+        margin: 2rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(34, 211, 238, 0.2);
       }
-
-      .card-container:hover .card-inner {
-        transform: rotateY(180deg) scale(1.05); /* Phóng to nhẹ khi lật */
+      #aiMarkdownOutput h2 {
+        font-size: 1.5rem;
+        color: #38bdf8;
+        font-weight: 600;
+        margin: 1.8rem 0 1rem;
       }
-
-      /* Hiệu ứng tia sáng quét qua lá bài khi di chuột */
-      .card-back::after {
-        content: "";
+      #aiMarkdownOutput h3 {
+        font-size: 1.25rem;
+        color: #7dd3fc;
+        font-weight: 600;
+        margin: 1.5rem 0 0.8rem;
+      }
+      #aiMarkdownOutput h4 {
+        font-size: 1.1rem;
+        color: #bae6fd;
+        font-weight: 600;
+        margin: 1.3rem 0 0.6rem;
+      }
+      #aiMarkdownOutput p {
+        margin-bottom: 1rem;
+        color: #cbd5e1;
+      }
+      #aiMarkdownOutput strong,
+      #aiMarkdownOutput b {
+        color: #ffffff;
+        font-weight: 600;
+      }
+      #aiMarkdownOutput em,
+      #aiMarkdownOutput i {
+        color: #e2e8f0;
+        font-style: italic;
+      }
+      #aiMarkdownOutput ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 1rem 0;
+      }
+      #aiMarkdownOutput ul li {
+        position: relative;
+        padding-left: 1.8rem;
+        margin-bottom: 0.75rem;
+        color: #e2e8f0;
+      }
+      #aiMarkdownOutput ul li::before {
+        content: "✦";
         position: absolute;
-        top: -100%;
-        left: -100%;
-        width: 300%;
-        height: 300%;
-        background: linear-gradient(
-          45deg,
-          transparent,
-          rgba(34, 211, 238, 0.1),
-          transparent
-        );
-        transition: 0.5s;
+        left: 0;
+        color: #22d3ee;
+        font-size: 0.9em;
       }
-      .card-back:hover::after {
-        top: -50%;
-        left: -50%;
+      #aiMarkdownOutput ol {
+        list-style: none;
+        counter-reset: list-counter;
+        padding-left: 0;
+        margin: 1rem 0;
       }
-      .card-container:hover .card-inner {
-        transform: rotateY(180deg) translateY(-10px) scale(1.02);
-        box-shadow: 0 25px 50px -12px rgba(34, 211, 238, 0.5);
+      #aiMarkdownOutput ol li {
+        counter-increment: list-counter;
+        position: relative;
+        padding-left: 2.2rem;
+        margin-bottom: 0.75rem;
+        color: #e2e8f0;
+      }
+      #aiMarkdownOutput ol li::before {
+        content: counter(list-counter) ".";
+        position: absolute;
+        left: 0;
+        color: #22d3ee;
+        font-weight: 600;
+        min-width: 1.8rem;
+      }
+      #aiMarkdownOutput blockquote {
+        border-left: 3px solid #22d3ee;
+        padding-left: 1.5rem;
+        margin: 1.5rem 0;
+        color: #94a3b8;
+        font-style: italic;
+        background: rgba(34, 211, 238, 0.05);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+      }
+      #aiMarkdownOutput code {
+        background: rgba(15, 23, 42, 0.7);
+        color: #fbbf24;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.375rem;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 0.9em;
+      }
+      #aiMarkdownOutput pre {
+        background: rgba(15, 23, 42, 0.8);
+        color: #f1f5f9;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      #aiMarkdownOutput pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+      }
+      #aiMarkdownOutput table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 0.75rem;
+        overflow: hidden;
+      }
+      #aiMarkdownOutput th {
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      #aiMarkdownOutput td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #e2e8f0;
+      }
+      #aiMarkdownOutput tr:last-child td {
+        border-bottom: none;
+      }
+      #aiMarkdownOutput hr {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.3), transparent);
+        margin: 2rem 0;
+      }
+      #aiMarkdownOutput a {
+        color: #38bdf8;
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(56, 189, 248, 0.3);
+        transition: all 0.2s ease;
+      }
+      #aiMarkdownOutput a:hover {
+        color: #22d3ee;
+        border-bottom: 1px solid rgba(34, 211, 238, 0.5);
+      }
+      #aiMarkdownOutput mark {
+        background: linear-gradient(120deg, rgba(34, 211, 238, 0.2) 0%, rgba(34, 211, 238, 0.1) 100%);
+        color: #ffffff;
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.25rem;
+      }
+      #aiMarkdownOutput .card,
+      #aiMarkdownOutput .note,
+      #aiMarkdownOutput .warning {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(34, 211, 238, 0.2);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin: 1.5rem 0;
+      }
+      #aiMarkdownOutput sub,
+      #aiMarkdownOutput sup {
+        font-size: 0.75em;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+      }
+      #aiMarkdownOutput sup {
+        top: -0.5em;
+      }
+      #aiMarkdownOutput sub {
+        bottom: -0.25em;
+      }
+      #aiMarkdownOutput .tarot-card {
+        background: rgba(34, 211, 238, 0.05);
+        border-left: 3px solid #22d3ee;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0.5rem;
+      }
+      #aiMarkdownOutput .tarot-card .card-name {
+        color: #22d3ee;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+      #aiMarkdownOutput .tarot-card .card-status {
+        color: #f472b6;
+        font-size: 0.85rem;
+        font-weight: 500;
       }
     </style>
   </head>
   <body class="overflow-x-hidden">
-    <div
-      id="cookieNotice"
-      class="fixed bottom-6 right-6 z-[100] max-w-sm glass-panel p-5 rounded-2xl hidden fade-up border-cyan-500/20"
-    >
-      <p class="text-xs text-slate-400 mb-4 leading-relaxed">
-        Để trải nghiệm mượt mà, chúng mình cần lưu trữ lịch sử vào trình duyệt
-        của bạn.
-      </p>
-      <div class="flex gap-3">
-        <button
-          onclick="acceptCookies(true)"
-          class="text-xs btn-gradient px-4 py-2 rounded-lg font-bold"
-        >
-          Chấp nhận
-        </button>
-        <button onclick="acceptCookies(false)" class="text-xs text-slate-500">
-          Từ chối
-        </button>
-      </div>
-    </div>
-
     <div class="max-w-6xl mx-auto px-6 py-12">
       <header class="text-center mb-16">
-        <h1
-          class="text-xs tracking-[0.6em] text-cyan-500 font-bold mb-4 uppercase"
-        >
-          Aetheris • Oracle
-        </h1>
-        <h2
-          class="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500"
-        >
-          Khám phá bản ngã.
-        </h2>
+        <h1 class="text-xs tracking-[0.6em] text-cyan-500 font-bold mb-4 uppercase">Aetheris • Oracle</h1>
+        <h2 class="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500">Khám phá bản ngã.</h2>
       </header>
-
       <div class="max-w-xl mx-auto space-y-12">
-        <section
-          class="glass-panel p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden"
-        >
-          <div
-            class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-[60px]"
-          ></div>
+        <section class="glass-panel p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-[60px]"></div>
           <div class="space-y-6 relative z-10">
             <div class="space-y-4">
-              <input
-                type="text"
-                id="username"
-                class="input-style w-full rounded-2xl px-5 py-4 outline-none text-sm"
-                placeholder="Tên của bạn..."
-              />
+              <input type="text" id="username" class="input-style w-full rounded-2xl px-5 py-4 outline-none text-sm" placeholder="Tên của bạn..." />
               <div class="grid grid-cols-2 gap-4">
-                <select
-                  id="numCards"
-                  class="input-style w-full rounded-2xl px-5 py-4 outline-none text-sm cursor-pointer"
-                >
+                <select id="numCards" class="input-style w-full rounded-2xl px-5 py-4 outline-none text-sm cursor-pointer">
                   <option value="1">1 Lá bài</option>
                   <option value="3" selected>3 Lá bài</option>
                   <option value="5">5 Lá bài</option>
                 </select>
-                <div
-                  class="flex items-center justify-center text-[10px] text-slate-500 uppercase tracking-widest font-bold border border-white/5 rounded-2xl"
-                >
-                  Spread Mode
+                <div class="flex items-center justify-center text-[10px] text-slate-500 uppercase tracking-widest font-bold border border-white/5 rounded-2xl">Spread Mode</div>
+              </div>
+              <textarea id="question" rows="3" class="input-style w-full rounded-2xl px-5 py-4 outline-none text-sm resize-none" placeholder="Viết câu hỏi của bạn..."></textarea>
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input type="password" id="apiKey" class="input-style flex-1 rounded-xl px-4 py-2 text-[10px] outline-none" placeholder="Nhập Gemini API Key..." />
+                  <button onclick="clearApiKey()" class="text-[9px] text-rose-500/50 hover:text-rose-500 font-bold uppercase">Xóa Key</button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <select id="modelSelect" class="input-style flex-1 rounded-xl px-4 py-2 text-[10px] outline-none cursor-pointer text-cyan-400 font-bold">
+                    <option value="gemini-3-flash-preview" selected>Gemini 3 Flash (Fast & Stable)</option>
+                    <option value="gemini-3-pro-preview">Gemini 3.0 Pro (Most Powerful)</option>
+                  </select>
+                  <div class="text-[9px] text-slate-500 font-bold uppercase">Model</div>
                 </div>
               </div>
-              <textarea
-                id="question"
-                rows="3"
-                class="input-style w-full rounded-2xl px-5 py-4 outline-none text-sm resize-none"
-                placeholder="Viết câu hỏi của bạn..."
-              ></textarea>
             </div>
-            <button
-              onclick="startReading()"
-              class="btn-gradient w-full py-5 rounded-2xl font-bold text-sm tracking-widest uppercase shadow-lg"
-            >
-              Bắt đầu trải bài
-            </button>
+            <button onclick="startReading()" class="btn-gradient w-full py-5 rounded-2xl font-bold text-sm tracking-widest uppercase shadow-lg">Bắt đầu trải bài</button>
           </div>
         </section>
-
         <div id="historyBox" class="hidden text-center space-y-4">
-          <span
-            class="text-[10px] text-slate-500 uppercase font-bold tracking-[0.3em]"
-            >Recent Sessions</span
-          >
-          <div
-            id="historyList"
-            class="flex flex-wrap justify-center gap-2"
-          ></div>
+          <span class="text-[10px] text-slate-500 uppercase font-bold tracking-[0.3em]">Recent Sessions</span>
+          <div id="historyList" class="flex flex-wrap justify-center gap-2"></div>
         </div>
       </div>
-
       <section id="readingArea" class="mt-24 hidden space-y-16">
         <div id="sessionHeader" class="max-w-2xl mx-auto text-center space-y-4">
-          <div
-            class="inline-block px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10"
-          >
-            <span
-              id="displayUserName"
-              class="text-cyan-400 text-xs font-bold uppercase tracking-widest"
-            ></span>
+          <div class="inline-block px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10">
+            <span id="displayUserName" class="text-cyan-400 text-xs font-bold uppercase tracking-widest"></span>
           </div>
-          <h3
-            id="displayQuestion"
-            class="text-xl md:text-2xl font-light italic text-slate-200 leading-relaxed"
-          ></h3>
+          <h3 id="displayQuestion" class="text-xl md:text-2xl font-light italic text-slate-200 leading-relaxed"></h3>
         </div>
-
-        <div
-          id="cardsGrid"
-          class="flex flex-wrap justify-center gap-8 w-full transition-all duration-700"
-        ></div>
-
-        <div
-          id="promptOutput"
-          class="max-w-2xl mx-auto glass-panel p-8 rounded-[3rem] opacity-0 transition-all duration-1000 border-cyan-500/20"
-        >
-          <div class="flex items-center justify-between mb-6">
-            <span
-              class="text-xs font-bold text-cyan-400 uppercase tracking-widest"
-              >AI Interpreter Prompt</span
-            >
-            <button
-              onclick="copyPrompt()"
-              class="w-10 h-10 rounded-full bg-white/5 hover:bg-cyan-500/20 flex items-center justify-center transition"
-            >
-              <i class="fas fa-copy text-xs"></i>
-            </button>
+        <div id="cardsGrid" class="flex flex-wrap justify-center gap-8 w-full transition-all duration-700"></div>
+        <div id="aiResponseArea" class="max-w-3xl mx-auto glass-panel p-8 md:p-12 rounded-[3rem] opacity-0 transition-all duration-1000 border-cyan-500/20 hidden">
+          <div class="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#22d3ee]"></div>
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Aetheris AI Oracle</span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="regenerateAI()" title="Luận giải lại" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-cyan-400 transition">
+                <i class="fas fa-redo-alt text-xs"></i>
+              </button>
+              <button onclick="copyResponse()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition">
+                <i class="fas fa-copy text-xs"></i>
+              </button>
+            </div>
           </div>
-          <div
-            id="promptText"
-            class="text-sm text-slate-400 leading-relaxed font-light italic"
-          ></div>
+          <div id="aiMarkdownOutput" class="text-slate-300 leading-relaxed font-light text-sm md:text-base"></div>
         </div>
       </section>
     </div>
+    <script type="module">
+      import { GoogleGenerativeAI } from "@google/generative-ai";
 
-    <script>
       const TAROT_DB = [
-        {
-          id: 0,
-          en: "The Fool",
-          vi: "Kẻ Khờ",
-          upright: "Sự khởi đầu, tự do, ngây thơ",
-          reversed: "Liều lĩnh, trì hoãn, thiếu trách nhiệm",
-        },
-        {
-          id: 1,
-          en: "The Magician",
-          vi: "Pháp Sư",
-          upright: "Sức mạnh, kỹ năng, tập trung",
-          reversed: "Lừa dối, yếu kém, không tập trung",
-        },
-        {
-          id: 2,
-          en: "The High Priestess",
-          vi: "Nữ Tư Tế",
-          upright: "Trực giác, bí ẩn, tiềm thức",
-          reversed: "Bí mật, thiếu hiểu biết, bỏ qua trực giác",
-        },
-        {
-          id: 3,
-          en: "The Empress",
-          vi: "Hoàng Hậu",
-          upright: "Sáng tạo, sinh sôi, nuôi dưỡng",
-          reversed: "Phụ thuộc, bỏ bê, thiếu sáng tạo",
-        },
-        {
-          id: 4,
-          en: "The Emperor",
-          vi: "Hoàng Đế",
-          upright: "Quyền lực, ổn định, lãnh đạo",
-          reversed: "Độc đoán, cứng nhắc, lạm dụng quyền lực",
-        },
-        {
-          id: 5,
-          en: "The Hierophant",
-          vi: "Giáo Hoàng",
-          upright: "Truyền thống, tín ngưỡng, kiến thức",
-          reversed: "Nổi loạn, giáo điều, bỏ ngoài tai lời khuyên",
-        },
-        {
-          id: 6,
-          en: "The Lovers",
-          vi: "Tình Nhân",
-          upright: "Tình yêu, hòa hợp, lựa chọn",
-          reversed: "Xung đột, mất cân bằng, lựa chọn sai lầm",
-        },
-        {
-          id: 7,
-          en: "The Chariot",
-          vi: "Cỗ Xe",
-          upright: "Ý chí, chiến thắng, kiểm soát",
-          reversed: "Thiếu kiểm soát, thất bại, thiếu phương hướng",
-        },
-        {
-          id: 8,
-          en: "Strength",
-          vi: "Sức Mạnh",
-          upright: "Can đảm, nhẫn nại, nội lực",
-          reversed: "Yếu đuối, nghi ngờ, thiếu kiên nhẫn",
-        },
-        {
-          id: 9,
-          en: "The Hermit",
-          vi: "Ẩn Sĩ",
-          upright: "Suy ngẫm, cô đơn, tìm kiếm nội tâm",
-          reversed: "Cô lập, trốn tránh, từ chối hướng dẫn",
-        },
-        {
-          id: 10,
-          en: "Wheel of Fortune",
-          vi: "Vận May",
-          upright: "Vận may, vận mệnh, bước ngoặt",
-          reversed: "Xui xẻo, chống lại sự thay đổi, vòng xoáy tiêu cực",
-        },
-        {
-          id: 11,
-          en: "Justice",
-          vi: "Công Lý",
-          upright: "Công bằng, sự thật, trách nhiệm",
-          reversed: "Bất công, thiên vị, trốn tránh trách nhiệm",
-        },
-        {
-          id: 12,
-          en: "The Hanged Man",
-          vi: "Kẻ Treo Cổ",
-          upright: "Hy sinh, buông bỏ, góc nhìn mới",
-          reversed: "Trì trệ, miễn cưỡng hy sinh, chống đối",
-        },
-        {
-          id: 13,
-          en: "Death",
-          vi: "Thần Chết",
-          upright: "Kết thúc, chuyển đổi, tái sinh",
-          reversed: "Sợ thay đổi, trì hoãn, trạng thái ì",
-        },
-        {
-          id: 14,
-          en: "Temperance",
-          vi: "Sự Điều Độ",
-          upright: "Cân bằng, điều độ, hòa hợp",
-          reversed: "Mất cân bằng, cực đoan, xung đột",
-        },
-        {
-          id: 15,
-          en: "The Devil",
-          vi: "Ác Quỷ",
-          upright: "Ràng buộc, dục vọng, vật chất",
-          reversed: "Giải phóng, vượt qua cám dỗ, tự do",
-        },
-        {
-          id: 16,
-          en: "The Tower",
-          vi: "Tòa Tháp",
-          upright: "Đột biến, hủy diệt, thức tỉnh",
-          reversed: "Tránh thảm họa, sợ thay đổi, giam cầm",
-        },
-        {
-          id: 17,
-          en: "The Star",
-          vi: "Ngôi Sao",
-          upright: "Hy vọng, cảm hứng, lạc quan",
-          reversed: "Thất vọng, bi quan, mất niềm tin",
-        },
-        {
-          id: 18,
-          en: "The Moon",
-          vi: "Mặt Trăng",
-          upright: "Ảo tưởng, sợ hãi, vô thức",
-          reversed: "Làm sáng tỏ, vượt qua nỗi sợ, hiểu biết",
-        },
-        {
-          id: 19,
-          en: "The Sun",
-          vi: "Mặt Trời",
-          upright: "Hạnh phúc, thành công, tích cực",
-          reversed: "Tạm thời đám mây, chậm thành công, thiếu tự tin",
-        },
-        {
-          id: 20,
-          en: "Judgement",
-          vi: "Sự Phán Xét",
-          upright: "Đánh giá, tái sinh, kêu gọi nội tâm",
-          reversed: "Phán xét bản thân, sợ đánh giá, từ chối kêu gọi",
-        },
-        {
-          id: 21,
-          en: "The World",
-          vi: "Thế Giới",
-          upright: "Hoàn thành, hội nhập, thành tựu",
-          reversed: "Chưa hoàn thành, thiếu kết thúc, trì hoãn",
-        },
-        {
-          id: 22,
-          en: "Ace of Wands",
-          vi: "Át Gậy",
-          upright: "Khởi đầu, cảm hứng, tiềm năng",
-          reversed: "Chậm trễ, thất vọng, thiếu năng lượng",
-        },
-        {
-          id: 23,
-          en: "Two of Wands",
-          vi: "Hai Gậy",
-          upright: "Lập kế hoạch, quyết định, khám phá",
-          reversed: "Sợ hãi, thiếu kế hoạch, mất phương hướng",
-        },
-        {
-          id: 24,
-          en: "Three of Wands",
-          vi: "Ba Gậy",
-          upright: "Mở rộng, tầm nhìn, hợp tác",
-          reversed: "Thiếu tầm nhìn, trì hoãn, chướng ngại",
-        },
-        {
-          id: 25,
-          en: "Four of Wands",
-          vi: "Bốn Gậy",
-          upright: "Hạnh phúc, đoàn tụ, thành tựu",
-          reversed: "Mất cân bằng, gia đình xáo trộn, thiếu hỗ trợ",
-        },
-        {
-          id: 26,
-          en: "Five of Wands",
-          vi: "Năm Gậy",
-          upright: "Xung đột, cạnh tranh, bất đồng",
-          reversed: "Giải quyết xung đột, tránh cạnh tranh, hòa bình",
-        },
-        {
-          id: 27,
-          en: "Six of Wands",
-          vi: "Sáu Gậy",
-          upright: "Chiến thắng, công nhận, tiến bộ",
-          reversed: "Thất bại, thiếu công nhận, kiêu ngạo",
-        },
-        {
-          id: 28,
-          en: "Seven of Wands",
-          vi: "Bảy Gậy",
-          upright: "Bảo vệ, kiên trì, thách thức",
-          reversed: "Từ bỏ, áp lực, thiếu phòng thủ",
-        },
-        {
-          id: 29,
-          en: "Eight of Wands",
-          vi: "Tám Gậy",
-          upright: "Tốc độ, hành động, tiến triển nhanh",
-          reversed: "Chậm trễ, trở ngại, vội vàng",
-        },
-        {
-          id: 30,
-          en: "Nine of Wands",
-          vi: "Chín Gậy",
-          upright: "Sức chịu đựng, cảnh giác, sẵn sàng",
-          reversed: "Kiệt sức, dễ bị tổn thương, nghi ngờ",
-        },
-        {
-          id: 31,
-          en: "Ten of Wands",
-          vi: "Mười Gậy",
-          upright: "Gánh nặng, trách nhiệm, làm việc quá sức",
-          reversed: "Giải phóng, ủy quyền, giảm tải",
-        },
-        {
-          id: 32,
-          en: "Page of Wands",
-          vi: "Thằng Bé Gậy",
-          upright: "Nhiệt tình, khám phá, tin tốt",
-          reversed: "Thiếu nhiệt tình, tin xấu, trì hoãn",
-        },
-        {
-          id: 33,
-          en: "Knight of Wands",
-          vi: "Kỵ Sĩ Gậy",
-          upright: "Hành động, phiêu lưu, bốc đồng",
-          reversed: "Thiếu kiên nhẫn, hấp tấp, trì hoãn",
-        },
-        {
-          id: 34,
-          en: "Queen of Wands",
-          vi: "Hoàng Hậu Gậy",
-          upright: "Tự tin, quyến rũ, độc lập",
-          reversed: "Ghen tuông, thiếu tự tin, phụ thuộc",
-        },
-        {
-          id: 35,
-          en: "King of Wands",
-          vi: "Vua Gậy",
-          upright: "Lãnh đạo, tầm nhìn, doanh nhân",
-          reversed: "Độc đoán, bốc đồng, thiếu tầm nhìn",
-        },
-        {
-          id: 36,
-          en: "Ace of Cups",
-          vi: "Át Cốc",
-          upright: "Tình yêu mới, cảm xúc, trực giác",
-          reversed: "Trái tim khép kín, cảm xúc hỗn loạn, thiếu kết nối",
-        },
-        {
-          id: 37,
-          en: "Two of Cups",
-          vi: "Hai Cốc",
-          upright: "Hợp tác, hòa hợp, tình yêu",
-          reversed: "Mất cân bằng, xung đột, hiểu lầm",
-        },
-        {
-          id: 38,
-          en: "Three of Cups",
-          vi: "Ba Cốc",
-          upright: "Hội hè, ăn mừng, tình bạn",
-          reversed: "Cô đơn, lạm dụng, xung đột xã hội",
-        },
-        {
-          id: 39,
-          en: "Four of Cups",
-          vi: "Bốn Cốc",
-          upright: "Suy ngẫm, không hài lòng, bỏ lỡ",
-          reversed: "Chấp nhận, hành động, thức tỉnh",
-        },
-        {
-          id: 40,
-          en: "Five of Cups",
-          vi: "Năm Cốc",
-          upright: "Mất mát, hối tiếc, thất vọng",
-          reversed: "Chấp nhận, chuyển tiếp, tìm thấy hy vọng",
-        },
-        {
-          id: 41,
-          en: "Six of Cups",
-          vi: "Sáu Cốc",
-          upright: "Quá khứ, kỷ niệm, hồi tưởng",
-          reversed: "Bám víu quá khứ, không thể tiến lên",
-        },
-        {
-          id: 42,
-          en: "Seven of Cups",
-          vi: "Bảy Cốc",
-          upright: "Lựa chọn, ảo tưởng, mơ mộng",
-          reversed: "Thiếu mục tiêu, phân tán, quyết định tồi",
-        },
-        {
-          id: 43,
-          en: "Eight of Cups",
-          vi: "Tám Cốc",
-          upright: "Rời bỏ, tìm kiếm, từ bỏ",
-          reversed: "Sợ thay đổi, bám víu, trốn tránh",
-        },
-        {
-          id: 44,
-          en: "Nine of Cups",
-          vi: "Chín Cốc",
-          upright: "Hài lòng, ước nguyện, thỏa mãn",
-          reversed: "Thiếu thốn, thiếu hài lòng, ích kỷ",
-        },
-        {
-          id: 45,
-          en: "Ten of Cups",
-          vi: "Mười Cốc",
-          upright: "Hạnh phúc gia đình, viên mãn, hòa thuận",
-          reversed: "Xung đột gia đình, mất hòa thuận, bất hạnh",
-        },
-        {
-          id: 46,
-          en: "Page of Cups",
-          vi: "Thằng Bé Cốc",
-          upright: "Tin tốt, sáng tạo, trực giác",
-          reversed: "Tin xấu, thiếu sáng tạo, cảm xúc hỗn loạn",
-        },
-        {
-          id: 47,
-          en: "Knight of Cups",
-          vi: "Kỵ Sĩ Cốc",
-          upright: "Lãng mạn, lý tưởng, theo đuổi cảm xúc",
-          reversed: "Thất vọng, không thực tế, cảm xúc lừa dối",
-        },
-        {
-          id: 48,
-          en: "Queen of Cups",
-          vi: "Hoàng Hậu Cốc",
-          upright: "Đồng cảm, trực giác, nuôi dưỡng",
-          reversed: "Cảm xúc không ổn định, phụ thuộc, thiếu đồng cảm",
-        },
-        {
-          id: 49,
-          en: "King of Cups",
-          vi: "Vua Cốc",
-          upright: "Cân bằng cảm xúc, trí tuệ, hỗ trợ",
-          reversed: "Kiểm soát cảm xúc, thao túng, thiếu kiểm soát",
-        },
-        {
-          id: 50,
-          en: "Ace of Swords",
-          vi: "Át Kiếm",
-          upright: "Đột phá, sự thật, chiến thắng",
-          reversed: "Lừa dối, phá hoại, thất bại",
-        },
-        {
-          id: 51,
-          en: "Two of Swords",
-          vi: "Hai Kiếm",
-          upright: "Bế tắc, lựa chọn khó khăn",
-          reversed: "Quyết định, giải phóng, lựa chọn rõ ràng",
-        },
-        {
-          id: 52,
-          en: "Three of Swords",
-          vi: "Ba Kiếm",
-          upright: "Đau khổ, đau tim, phản bội",
-          reversed: "Hồi phục, tha thứ, chữa lành",
-        },
-        {
-          id: 53,
-          en: "Four of Swords",
-          vi: "Bốn Kiếm",
-          upright: "Nghỉ ngơi, hồi phục, suy ngẫm",
-          reversed: "Kiệt sức, căng thẳng, không nghỉ ngơi",
-        },
-        {
-          id: 54,
-          en: "Five of Swords",
-          vi: "Năm Kiếm",
-          upright: "Xung đột, thất bại, chiến thắng rỗng",
-          reversed: "Hòa giải, tha thứ, tránh xung đột",
-        },
-        {
-          id: 55,
-          en: "Six of Swords",
-          vi: "Sáu Kiếm",
-          upright: "Chuyển tiếp, vượt qua khó khăn",
-          reversed: "Mắc kẹt, không thể tiến lên, hậu quả",
-        },
-        {
-          id: 56,
-          en: "Seven of Swords",
-          vi: "Bảy Kiếm",
-          upright: "Lừa dối, trốn tránh, thủ đoạn",
-          reversed: "Thú nhận, hối hận, chấp nhận",
-        },
-        {
-          id: 57,
-          en: "Eight of Swords",
-          vi: "Tám Kiếm",
-          upright: "Hạn chế, nạn nhân, bất lực",
-          reversed: "Giải phóng, tự do, vượt qua giới hạn",
-        },
-        {
-          id: 58,
-          en: "Nine of Swords",
-          vi: "Chín Kiếm",
-          upright: "Lo âu, sợ hãi, ác mộng",
-          reversed: "Vượt qua lo âu, hy vọng, tìm kiếm giúp đỡ",
-        },
-        {
-          id: 59,
-          en: "Ten of Swords",
-          vi: "Mười Kiếm",
-          upright: "Kết thúc đau đớn, phản bội, thất bại",
-          reversed: "Phục hồi, tái sinh, giải phóng",
-        },
-        {
-          id: 60,
-          en: "Page of Swords",
-          vi: "Thằng Bé Kiếm",
-          upright: "Tò mò, cảnh giác, học hỏi",
-          reversed: "Nói xấu, thiếu chuẩn bị, thông tin sai",
-        },
-        {
-          id: 61,
-          en: "Knight of Swords",
-          vi: "Kỵ Sĩ Kiếm",
-          upright: "Hành động nhanh, quyết đoán, bốc đồng",
-          reversed: "Hấp tấp, thiếu chuẩn bị, hung hăng",
-        },
-        {
-          id: 62,
-          en: "Queen of Swords",
-          vi: "Hoàng Hậu Kiếm",
-          upright: "Trí tuệ, độc lập, thẳng thắn",
-          reversed: "Độc ác, cay đắng, cô lập",
-        },
-        {
-          id: 63,
-          en: "King of Swords",
-          vi: "Vua Kiếm",
-          upright: "Trí tuệ, công bằng, quyết đoán",
-          reversed: "Độc đoán, lạm dụng quyền lực, vô cảm",
-        },
-        {
-          id: 64,
-          en: "Ace of Pentacles",
-          vi: "Át Tiền",
-          upright: "Cơ hội vật chất, thịnh vượng, đầu tư",
-          reversed: "Cơ hội bị bỏ lỡ, tham lam, thiếu tài chính",
-        },
-        {
-          id: 65,
-          en: "Two of Pentacles",
-          vi: "Hai Tiền",
-          upright: "Cân bằng, linh hoạt, đa nhiệm",
-          reversed: "Mất cân bằng, căng thẳng, thiếu tổ chức",
-        },
-        {
-          id: 66,
-          en: "Three of Pentacles",
-          vi: "Ba Tiền",
-          upright: "Hợp tác, học việc, làm việc nhóm",
-          reversed: "Thiếu hợp tác, làm việc đơn độc, không chuyên nghiệp",
-        },
-        {
-          id: 67,
-          en: "Four of Pentacles",
-          vi: "Bốn Tiền",
-          upright: "Bảo thủ, an toàn, kiểm soát",
-          reversed: "Hao hụt tài chính, tham lam, lỏng lẻo",
-        },
-        {
-          id: 68,
-          en: "Five of Pentacles",
-          vi: "Năm Tiền",
-          upright: "Khó khăn tài chính, cô đơn, thiếu thốn",
-          reversed: "Phục hồi, vượt qua khó khăn, tìm kiếm giúp đỡ",
-        },
-        {
-          id: 69,
-          en: "Six of Pentacles",
-          vi: "Sáu Tiền",
-          upright: "Chia sẻ, cho và nhận, công bằng",
-          reversed: "Mất cân bằng, ích kỷ, lợi dụng",
-        },
-        {
-          id: 70,
-          en: "Seven of Pentacles",
-          vi: "Bảy Tiền",
-          upright: "Kiên nhẫn, đầu tư dài hạn, đánh giá",
-          reversed: "Thiếu kiên nhẫn, kết quả kém, lãng phí",
-        },
-        {
-          id: 71,
-          en: "Eight of Pentacles",
-          vi: "Tám Tiền",
-          upright: "Chăm chỉ, học hỏi, thủ công",
-          reversed: "Lười biếng, thiếu kỹ năng, làm việc vô nghĩa",
-        },
-        {
-          id: 72,
-          en: "Nine of Pentacles",
-          vi: "Chín Tiền",
-          upright: "Độc lập tài chính, xa xỉ, tự túc",
-          reversed: "Phụ thuộc tài chính, lãng phí, cô đơn",
-        },
-        {
-          id: 73,
-          en: "Ten of Pentacles",
-          vi: "Mười Tiền",
-          upright: "Thịnh vượng gia đình, di sản, ổn định",
-          reversed: "Xung đột gia đình, mất di sản, bất ổn",
-        },
-        {
-          id: 74,
-          en: "Page of Pentacles",
-          vi: "Thằng Bé Tiền",
-          upright: "Học hỏi, cơ hội mới, thực tế",
-          reversed: "Thiếu tham vọng, lãng phí cơ hội, thiếu thực tế",
-        },
-        {
-          id: 75,
-          en: "Knight of Pentacles",
-          vi: "Kỵ Sĩ Tiền",
-          upright: "Chăm chỉ, đáng tin cậy, kiên trì",
-          reversed: "Lười biếng, cứng nhắc, thiếu tiến bộ",
-        },
-        {
-          id: 76,
-          en: "Queen of Pentacles",
-          vi: "Hoàng Hậu Tiền",
-          upright: "Thịnh vượng, nuôi dưỡng, thực tế",
-          reversed: "Thiếu thịnh vượng, bỏ bê, vật chất quá mức",
-        },
-        {
-          id: 77,
-          en: "King of Pentacles",
-          vi: "Vua Tiền",
-          upright: "Thịnh vượng, thành công vật chất, lãnh đạo",
-          reversed: "Tham lam, thiếu đạo đức, mất tài sản",
-        },
+        { id: 0, en: "The Fool", vi: "Kẻ Khờ", upright: "Sự khởi đầu, tự do, ngây thơ", reversed: "Liều lĩnh, trì hoãn, thiếu trách nhiệm" },
+        { id: 1, en: "The Magician", vi: "Pháp Sư", upright: "Sức mạnh, kỹ năng, tập trung", reversed: "Lừa dối, yếu kém, không tập trung" },
+        { id: 2, en: "The High Priestess", vi: "Nữ Tư Tế", upright: "Trực giác, bí ẩn, tiềm thức", reversed: "Bí mật, thiếu hiểu biết, bỏ qua trực giác" },
+        { id: 3, en: "The Empress", vi: "Hoàng Hậu", upright: "Sáng tạo, sinh sôi, nuôi dưỡng", reversed: "Phụ thuộc, bỏ bê, thiếu sáng tạo" },
+        { id: 4, en: "The Emperor", vi: "Hoàng Đế", upright: "Quyền lực, ổn định, lãnh đạo", reversed: "Độc đoán, cứng nhắc, lạm dụng quyền lực" },
+        { id: 5, en: "The Hierophant", vi: "Giáo Hoàng", upright: "Truyền thống, tín ngưỡng, kiến thức", reversed: "Nổi loạn, giáo điều, bỏ ngoài tai lời khuyên" },
+        { id: 6, en: "The Lovers", vi: "Tình Nhân", upright: "Tình yêu, hòa hợp, lựa chọn", reversed: "Xung đột, mất cân bằng, lựa chọn sai lầm" },
+        { id: 7, en: "The Chariot", vi: "Cỗ Xe", upright: "Ý chí, chiến thắng, kiểm soát", reversed: "Thiếu kiểm soát, thất bại, thiếu phương hướng" },
+        { id: 8, en: "Strength", vi: "Sức Mạnh", upright: "Can đảm, nhẫn nại, nội lực", reversed: "Yếu đuối, nghi ngờ, thiếu kiên nhẫn" },
+        { id: 9, en: "The Hermit", vi: "Ẩn Sĩ", upright: "Suy ngẫm, cô đơn, tìm kiếm nội tâm", reversed: "Cô lập, trốn tránh, từ chối hướng dẫn" },
+        { id: 10, en: "Wheel of Fortune", vi: "Vận May", upright: "Vận may, vận mệnh, bước ngoặt", reversed: "Xui xẻo, chống lại sự thay đổi, vòng xoáy tiêu cực" },
+        { id: 11, en: "Justice", vi: "Công Lý", upright: "Công bằng, sự thật, trách nhiệm", reversed: "Bất công, thiên vị, trốn tránh trách nhiệm" },
+        { id: 12, en: "The Hanged Man", vi: "Kẻ Treo Cổ", upright: "Hy sinh, buông bỏ, góc nhìn mới", reversed: "Trì trệ, miễn cưỡng hy sinh, chống đối" },
+        { id: 13, en: "Death", vi: "Thần Chết", upright: "Kết thúc, chuyển đổi, tái sinh", reversed: "Sợ thay đổi, trì hoãn, trạng thái ì" },
+        { id: 14, en: "Temperance", vi: "Sự Điều Độ", upright: "Cân bằng, điều độ, hòa hợp", reversed: "Mất cân bằng, cực đoan, xung đột" },
+        { id: 15, en: "The Devil", vi: "Ác Quỷ", upright: "Ràng buộc, dục vọng, vật chất", reversed: "Giải phóng, vượt qua cám dỗ, tự do" },
+        { id: 16, en: "The Tower", vi: "Tòa Tháp", upright: "Đột biến, hủy diệt, thức tỉnh", reversed: "Tránh thảm họa, sợ thay đổi, giam cầm" },
+        { id: 17, en: "The Star", vi: "Ngôi Sao", upright: "Hy vọng, cảm hứng, lạc quan", reversed: "Thất vọng, bi quan, mất niềm tin" },
+        { id: 18, en: "The Moon", vi: "Mặt Trăng", upright: "Ảo tưởng, sợ hãi, vô thức", reversed: "Làm sáng tỏ, vượt qua nỗi sợ, hiểu biết" },
+        { id: 19, en: "The Sun", vi: "Mặt Trời", upright: "Hạnh phúc, thành công, tích cực", reversed: "Tạm thời đám mây, chậm thành công, thiếu tự tin" },
+        { id: 20, en: "Judgement", vi: "Sự Phán Xét", upright: "Đánh giá, tái sinh, kêu gọi nội tâm", reversed: "Phán xét bản thân, sợ đánh giá, từ chối kêu gọi" },
+        { id: 21, en: "The World", vi: "Thế Giới", upright: "Hoàn thành, hội nhập, thành tựu", reversed: "Chưa hoàn thành, thiếu kết thúc, trì hoãn" },
+        { id: 22, en: "Ace of Wands", vi: "Át Gậy", upright: "Khởi đầu, cảm hứng, tiềm năng", reversed: "Chậm trễ, thất vọng, thiếu năng lượng" },
+        { id: 23, en: "Two of Wands", vi: "Hai Gậy", upright: "Lập kế hoạch, quyết định, khám phá", reversed: "Sợ hãi, thiếu kế hoạch, mất phương hướng" },
+        { id: 24, en: "Three of Wands", vi: "Ba Gậy", upright: "Mở rộng, tầm nhìn, hợp tác", reversed: "Thiếu tầm nhìn, trì hoãn, chướng ngại" },
+        { id: 25, en: "Four of Wands", vi: "Bốn Gậy", upright: "Hạnh phúc, đoàn tụ, thành tựu", reversed: "Mất cân bằng, gia đình xáo trộn, thiếu hỗ trợ" },
+        { id: 26, en: "Five of Wands", vi: "Năm Gậy", upright: "Xung đột, cạnh tranh, bất đồng", reversed: "Giải quyết xung đột, tránh cạnh tranh, hòa bình" },
+        { id: 27, en: "Six of Wands", vi: "Sáu Gậy", upright: "Chiến thắng, công nhận, tiến bộ", reversed: "Thất bại, thiếu công nhận, kiêu ngạo" },
+        { id: 28, en: "Seven of Wands", vi: "Bảy Gậy", upright: "Bảo vệ, kiên trì, thách thức", reversed: "Từ bỏ, áp lực, thiếu phòng thủ" },
+        { id: 29, en: "Eight of Wands", vi: "Tám Gậy", upright: "Tốc độ, hành động, tiến triển nhanh", reversed: "Chậm trễ, trở ngại, vội vàng" },
+        { id: 30, en: "Nine of Wands", vi: "Chín Gậy", upright: "Sức chịu đựng, cảnh giác, sẵn sàng", reversed: "Kiệt sức, dễ bị tổn thương, nghi ngờ" },
+        { id: 31, en: "Ten of Wands", vi: "Mười Gậy", upright: "Gánh nặng, trách nhiệm, làm việc quá sức", reversed: "Giải phóng, ủy quyền, giảm tải" },
+        { id: 32, en: "Page of Wands", vi: "Thằng Bé Gậy", upright: "Nhiệt tình, khám phá, tin tốt", reversed: "Thiếu nhiệt tình, tin xấu, trì hoãn" },
+        { id: 33, en: "Knight of Wands", vi: "Kỵ Sĩ Gậy", upright: "Hành động, phiêu lưu, bốc đồng", reversed: "Thiếu kiên nhẫn, hấp tấp, trì hoãn" },
+        { id: 34, en: "Queen of Wands", vi: "Hoàng Hậu Gậy", upright: "Tự tin, quyến rũ, độc lập", reversed: "Ghen tuông, thiếu tự tin, phụ thuộc" },
+        { id: 35, en: "King of Wands", vi: "Vua Gậy", upright: "Lãnh đạo, tầm nhìn, doanh nhân", reversed: "Độc đoán, bốc đồng, thiếu tầm nhìn" },
+        { id: 36, en: "Ace of Cups", vi: "Át Cốc", upright: "Tình yêu mới, cảm xúc, trực giác", reversed: "Trái tim khép kín, cảm xúc hỗn loạn, thiếu kết nối" },
+        { id: 37, en: "Two of Cups", vi: "Hai Cốc", upright: "Hợp tác, hòa hợp, tình yêu", reversed: "Mất cân bằng, xung đột, hiểu lầm" },
+        { id: 38, en: "Three of Cups", vi: "Ba Cốc", upright: "Hội hè, ăn mừng, tình bạn", reversed: "Cô đơn, lạm dụng, xung đột xã hội" },
+        { id: 39, en: "Four of Cups", vi: "Bốn Cốc", upright: "Suy ngẫm, không hài lòng, bỏ lỡ", reversed: "Chấp nhận, hành động, thức tỉnh" },
+        { id: 40, en: "Five of Cups", vi: "Năm Cốc", upright: "Mất mát, hối tiếc, thất vọng", reversed: "Chấp nhận, chuyển tiếp, tìm thấy hy vọng" },
+        { id: 41, en: "Six of Cups", vi: "Sáu Cốc", upright: "Quá khứ, kỷ niệm, hồi tưởng", reversed: "Bám víu quá khứ, không thể tiến lên" },
+        { id: 42, en: "Seven of Cups", vi: "Bảy Cốc", upright: "Lựa chọn, ảo tưởng, mơ mộng", reversed: "Thiếu mục tiêu, phân tán, quyết định tồi" },
+        { id: 43, en: "Eight of Cups", vi: "Tám Cốc", upright: "Rời bỏ, tìm kiếm, từ bỏ", reversed: "Sợ thay đổi, bám víu, trốn tránh" },
+        { id: 44, en: "Nine of Cups", vi: "Chín Cốc", upright: "Hài lòng, ước nguyện, thỏa mãn", reversed: "Thiếu thốn, thiếu hài lòng, ích kỷ" },
+        { id: 45, en: "Ten of Cups", vi: "Mười Cốc", upright: "Hạnh phúc gia đình, viên mãn, hòa thuận", reversed: "Xung đột gia đình, mất hòa thuận, bất hạnh" },
+        { id: 46, en: "Page of Cups", vi: "Thằng Bé Cốc", upright: "Tin tốt, sáng tạo, trực giác", reversed: "Tin xấu, thiếu sáng tạo, cảm xúc hỗn loạn" },
+        { id: 47, en: "Knight of Cups", vi: "Kỵ Sĩ Cốc", upright: "Lãng mạn, lý tưởng, theo đuổi cảm xúc", reversed: "Thất vọng, không thực tế, cảm xúc lừa dối" },
+        { id: 48, en: "Queen of Cups", vi: "Hoàng Hậu Cốc", upright: "Đồng cảm, trực giác, nuôi dưỡng", reversed: "Cảm xúc không ổn định, phụ thuộc, thiếu đồng cảm" },
+        { id: 49, en: "King of Cups", vi: "Vua Cốc", upright: "Cân bằng cảm xúc, trí tuệ, hỗ trợ", reversed: "Kiểm soát cảm xúc, thao túng, thiếu kiểm soát" },
+        { id: 50, en: "Ace of Swords", vi: "Át Kiếm", upright: "Đột phá, sự thật, chiến thắng", reversed: "Lừa dối, phá hoại, thất bại" },
+        { id: 51, en: "Two of Swords", vi: "Hai Kiếm", upright: "Bế tắc, lựa chọn khó khăn", reversed: "Quyết định, giải phóng, lựa chọn rõ ràng" },
+        { id: 52, en: "Three of Swords", vi: "Ba Kiếm", upright: "Đau khổ, đau tim, phản bội", reversed: "Hồi phục, tha thứ, chữa lành" },
+        { id: 53, en: "Four of Swords", vi: "Bốn Kiếm", upright: "Nghỉ ngơi, hồi phục, suy ngẫm", reversed: "Kiệt sức, căng thẳng, không nghỉ ngơi" },
+        { id: 54, en: "Five of Swords", vi: "Năm Kiếm", upright: "Xung đột, thất bại, chiến thắng rỗng", reversed: "Hòa giải, tha thứ, tránh xung đột" },
+        { id: 55, en: "Six of Swords", vi: "Sáu Kiếm", upright: "Chuyển tiếp, vượt qua khó khăn", reversed: "Mắc kẹt, không thể tiến lên, hậu quả" },
+        { id: 56, en: "Seven of Swords", vi: "Bảy Kiếm", upright: "Lừa dối, trốn tránh, thủ đoạn", reversed: "Thú nhận, hối hận, chấp nhận" },
+        { id: 57, en: "Eight of Swords", vi: "Tám Kiếm", upright: "Hạn chế, nạn nhân, bất lực", reversed: "Giải phóng, tự do, vượt qua giới hạn" },
+        { id: 58, en: "Nine of Swords", vi: "Chín Kiếm", upright: "Lo âu, sợ hãi, ác mộng", reversed: "Vượt qua lo âu, hy vọng, tìm kiếm giúp đỡ" },
+        { id: 59, en: "Ten of Swords", vi: "Mười Kiếm", upright: "Kết thúc đau đớn, phản bội, thất bại", reversed: "Phục hồi, tái sinh, giải phóng" },
+        { id: 60, en: "Page of Swords", vi: "Thằng Bé Kiếm", upright: "Tò mò, cảnh giác, học hỏi", reversed: "Nói xấu, thiếu chuẩn bị, thông tin sai" },
+        { id: 61, en: "Knight of Swords", vi: "Kỵ Sĩ Kiếm", upright: "Hành động nhanh, quyết đoán, bốc đồng", reversed: "Hấp tấp, thiếu chuẩn bị, hung hăng" },
+        { id: 62, en: "Queen of Swords", vi: "Hoàng Hậu Kiếm", upright: "Trí tuệ, độc lập, thẳng thắn", reversed: "Độc ác, cay đắng, cô lập" },
+        { id: 63, en: "King of Swords", vi: "Vua Kiếm", upright: "Trí tuệ, công bằng, quyết đoán", reversed: "Độc đoán, lạm dụng quyền lực, vô cảm" },
+        { id: 64, en: "Ace of Pentacles", vi: "Át Tiền", upright: "Cơ hội vật chất, thịnh vượng, đầu tư", reversed: "Cơ hội bị bỏ lỡ, tham lam, thiếu tài chính" },
+        { id: 65, en: "Two of Pentacles", vi: "Hai Tiền", upright: "Cân bằng, linh hoạt, đa nhiệm", reversed: "Mất cân bằng, căng thẳng, thiếu tổ chức" },
+        { id: 66, en: "Three of Pentacles", vi: "Ba Tiền", upright: "Hợp tác, học việc, làm việc nhóm", reversed: "Thiếu hợp tác, làm việc đơn độc, không chuyên nghiệp" },
+        { id: 67, en: "Four of Pentacles", vi: "Bốn Tiền", upright: "Bảo thủ, an toàn, kiểm soát", reversed: "Hao hụt tài chính, tham lam, lỏng lẻo" },
+        { id: 68, en: "Five of Pentacles", vi: "Năm Tiền", upright: "Khó khăn tài chính, cô đơn, thiếu thốn", reversed: "Phục hồi, vượt qua khó khăn, tìm kiếm giúp đỡ" },
+        { id: 69, en: "Six of Pentacles", vi: "Sáu Tiền", upright: "Chia sẻ, cho và nhận, công bằng", reversed: "Mất cân bằng, ích kỷ, lợi dụng" },
+        { id: 70, en: "Seven of Pentacles", vi: "Bảy Tiền", upright: "Kiên nhẫn, đầu tư dài hạn, đánh giá", reversed: "Thiếu kiên nhẫn, kết quả kém, lãng phí" },
+        { id: 71, en: "Eight of Pentacles", vi: "Tám Tiền", upright: "Chăm chỉ, học hỏi, thủ công", reversed: "Lười biếng, thiếu kỹ năng, làm việc vô nghĩa" },
+        { id: 72, en: "Nine of Pentacles", vi: "Chín Tiền", upright: "Độc lập tài chính, xa xỉ, tự túc", reversed: "Phụ thuộc tài chính, lãng phí, cô đơn" },
+        { id: 73, en: "Ten of Pentacles", vi: "Mười Tiền", upright: "Thịnh vượng gia đình, di sản, ổn định", reversed: "Xung đột gia đình, mất di sản, bất ổn" },
+        { id: 74, en: "Page of Pentacles", vi: "Thằng Bé Tiền", upright: "Học hỏi, cơ hội mới, thực tế", reversed: "Thiếu tham vọng, lãng phí cơ hội, thiếu thực tế" },
+        { id: 75, en: "Knight of Pentacles", vi: "Kỵ Sĩ Tiền", upright: "Chăm chỉ, đáng tin cậy, kiên trì", reversed: "Lười biếng, cứng nhắc, thiếu tiến bộ" },
+        { id: 76, en: "Queen of Pentacles", vi: "Hoàng Hậu Tiền", upright: "Thịnh vượng, nuôi dưỡng, thực tế", reversed: "Thiếu thịnh vượng, bỏ bê, vật chất quá mức" },
+        { id: 77, en: "King of Pentacles", vi: "Vua Tiền", upright: "Thịnh vượng, thành công vật chất, lãnh đạo", reversed: "Tham lam, thiếu đạo đức, mất tài sản" },
       ];
+
       let historyAllowed = localStorage.getItem("aetheris_consent") === "true";
+      let currentSessionData = null;
 
       window.onload = () => {
-        if (localStorage.getItem("aetheris_consent") === null) {
-          setTimeout(
-            () =>
-              document
-                .getElementById("cookieNotice")
-                .classList.replace("hidden", "flex"),
-            1000,
-          );
-        }
+        const savedKey = localStorage.getItem("gemini_api_key");
+        if (savedKey) document.getElementById("apiKey").value = savedKey;
+        loadPreferences();
         renderHistory();
       };
 
-      function acceptCookies(val) {
-        localStorage.setItem("aetheris_consent", val);
-        historyAllowed = val;
-        document
-          .getElementById("cookieNotice")
-          .classList.replace("flex", "hidden");
-      }
-
-      async function startReading() {
-        const name = document.getElementById("username").value || "Someone";
-        const question = document.getElementById("question").value;
-        const count = parseInt(document.getElementById("numCards").value);
-
-        if (!question) return alert("Vui lòng nhập câu hỏi.");
-
-        const drawnCards = [...TAROT_DB]
-          .sort(() => 0.5 - Math.random())
-          .slice(0, count)
-          .map((c) => ({
-            ...c,
-            isRev: Math.random() > 0.7,
-          }));
-
-        const sessionData = {
-          id: Date.now(),
-          name,
-          question,
-          cards: drawnCards,
+      function savePreferences() {
+        const prefs = {
+          username: document.getElementById("username").value,
+          numCards: document.getElementById("numCards").value,
+          model: document.getElementById("modelSelect").value,
         };
-        if (historyAllowed) saveSession(sessionData);
-        renderSession(sessionData);
+        localStorage.setItem("aetheris_prefs", JSON.stringify(prefs));
       }
 
-      function saveSession(data) {
-        let history = JSON.parse(
-          localStorage.getItem("aetheris_history") || "[]",
-        );
-        history.unshift(data);
-        localStorage.setItem(
-          "aetheris_history",
-          JSON.stringify(history.slice(0, 8)),
-        );
-        renderHistory();
-      }
-      
-      function deleteSession(event, id) {
-        // Ngăn sự kiện click lan ra nút cha (không làm trigger replaySession)
-        event.stopPropagation();
-        
-        let history = JSON.parse(
-          localStorage.getItem("aetheris_history") || "[]",
-        );
-        
-        // Lọc bỏ session có id tương ứng
-        history = history.filter(s => s.id !== id);
-        
-        // Lưu lại vào localStorage
-        localStorage.setItem("aetheris_history", JSON.stringify(history));
-        
-        // Cập nhật lại giao diện
-        renderHistory();
-      }
-
-      function renderHistory() {
-        const box = document.getElementById("historyBox");
-        const list = document.getElementById("historyList");
-        const history = JSON.parse(localStorage.getItem("aetheris_history") || "[]");
-        
-        if (history.length > 0) {
-          box.classList.remove("hidden");
-          list.innerHTML = history.map((h) => `
-            <div class="flex items-center bg-white/5 border border-white/5 rounded-full hover:border-cyan-500/50 hover:bg-cyan-500/5 transition group overflow-hidden pr-2">
-              <button onclick="replaySession(${h.id})" class="text-[10px] pl-4 pr-2 py-2 text-slate-300 hover:text-white transition-colors">
-                ${h.question.substring(0, 15)}...
-              </button>
-              
-              <div class="w-[1px] h-3 bg-white/10 group-hover:bg-cyan-500/30"></div>
-              
-              <button onclick="deleteSession(event, ${h.id})" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-colors ml-1">
-                <i class="fas fa-times text-[10px]"></i>
-              </button>
-            </div>
-          `).join("");
-        } else {
-          box.classList.add("hidden");
+      function loadPreferences() {
+        const savedPrefs = localStorage.getItem("aetheris_prefs");
+        if (savedPrefs) {
+          const prefs = JSON.parse(savedPrefs);
+          if (prefs.username) document.getElementById("username").value = prefs.username;
+          if (prefs.numCards) document.getElementById("numCards").value = prefs.numCards;
+          if (prefs.model) document.getElementById("modelSelect").value = prefs.model;
         }
       }
 
-      function replaySession(id) {
-        const history = JSON.parse(
-          localStorage.getItem("aetheris_history") || "[]",
-        );
-        const session = history.find((s) => s.id == id);
-        if (session) renderSession(session);
+      async function typeWriter(text, element) {
+        const parsedHTML = marked.parse(text);
+        element.innerHTML = parsedHTML;
+        element.classList.add("fade-up");
       }
 
-      // HÀM RENDER ĐÃ ĐƯỢC FIX LỖI VÀ TỐI ƯU
       async function renderSession(data) {
+        currentSessionData = data;
         const area = document.getElementById("readingArea");
         const grid = document.getElementById("cardsGrid");
-        const promptOutput = document.getElementById("promptOutput");
-        const promptText = document.getElementById("promptText");
+        const aiArea = document.getElementById("aiResponseArea");
+        const aiOutput = document.getElementById("aiMarkdownOutput");
+        const apiKey = document.getElementById("apiKey").value;
+        const modelName = document.getElementById("modelSelect").value;
 
-        // 1. Reset trạng thái hiển thị
         area.classList.remove("hidden");
-        promptOutput.classList.remove("opacity-100");
-        promptOutput.classList.add("opacity-0");
         grid.innerHTML = "";
+        aiArea.classList.add("hidden");
+        aiArea.style.opacity = "0";
 
         document.getElementById("displayUserName").innerText = data.name;
-        document.getElementById("displayQuestion").innerText =
-          `“${data.question}”`;
+        document.getElementById("displayQuestion").innerText = `“${data.question}”`;
 
-        // 2. Tạo danh sách bài cho Prompt (Fix lỗi undefined cardsList)
-        const cardsInfo = data.cards
-          .map((c) => `${c.en} (${c.isRev ? "Ngược" : "Xuôi"})`)
-          .join(", ");
-
-        // 3. Render từng lá bài với hiệu ứng
         for (let i = 0; i < data.cards.length; i++) {
           const card = data.cards[i];
           const cardUI = document.createElement("div");
           cardUI.className = "card-container fade-up w-[260px] h-[400px]";
-
           const statusClass = card.isRev ? "text-rose-400" : "text-cyan-400";
-          const cardMeaning = card.isRev ? card.reversed : card.upright;
-
           cardUI.innerHTML = `
-        <div class="card-inner relative w-full h-full shadow-2xl rounded-[2.5rem] cursor-pointer">
-          <div class="card-face card-front glass-panel rounded-[2.5rem] flex items-center justify-center border-white/10">
-            <div class="w-16 h-16 rounded-full border border-cyan-500/20 flex items-center justify-center relative">
-              <div class="absolute inset-0 rounded-full bg-cyan-500/5 animate-ping"></div>
-              <div class="w-3 h-3 bg-cyan-500 rounded-full shadow-[0_0_20px_#22d3ee]"></div>
-            </div>
-          </div>
-          <div class="card-face card-back glass-panel rounded-[2.5rem] p-8 flex flex-col items-center border-cyan-500/40 overflow-hidden">
-            <div class="text-[9px] font-bold text-slate-500 tracking-[0.3em] uppercase mb-auto">Arcana ${i + 1}</div>
-            <div class="flex-grow flex flex-col items-center justify-center text-center">
-              <div class="text-2xl font-bold text-white mb-1 ${card.isRev ? "rotate-180" : ""}">${card.vi}</div>
-              <div class="text-[10px] text-slate-500 uppercase tracking-[0.2em] mb-6">${card.en}</div>
-              <p class="text-[12px] text-slate-300 leading-relaxed font-medium line-clamp-5">${cardMeaning}</p>
-            </div>
-            <div class="mt-auto pt-6 w-full text-center">
-              <span class="text-[10px] font-black tracking-[0.2em] uppercase ${statusClass}">
-                ${card.isRev ? "• Chiều Ngược •" : "• Chiều Xuôi •"}
-              </span>
-            </div>
-          </div>
-        </div>`;
-
+            <div class="card-inner relative w-full h-full shadow-2xl rounded-[2.5rem] cursor-pointer">
+              <div class="card-face card-front glass-panel rounded-[2.5rem] flex items-center justify-center border-white/10">
+                <div class="w-12 h-12 rounded-full border border-cyan-500/20 flex items-center justify-center relative"><div class="absolute inset-0 rounded-full bg-cyan-500/5 animate-ping"></div><div class="w-2 h-2 bg-cyan-500 rounded-full"></div></div>
+              </div>
+              <div class="card-face card-back glass-panel rounded-[2.5rem] p-8 flex flex-col items-center border-cyan-500/40">
+                <div class="text-[9px] font-bold text-slate-500 tracking-widest uppercase mb-auto">Arcana ${i + 1}</div>
+                <div class="flex-grow flex flex-col items-center justify-center text-center">
+                  <div class="text-2xl font-bold text-white ${card.isRev ? "rotate-180" : ""}">${card.vi}</div>
+                  <div class="text-[10px] text-slate-500 uppercase tracking-widest mb-6">${card.en}</div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed line-clamp-6">${card.isRev ? card.reversed : card.upright}</p>
+                </div>
+                <div class="mt-auto pt-4 text-[9px] font-black uppercase ${statusClass}">${card.isRev ? "• Ngược •" : "• Xuôi •"}</div>
+              </div>
+            </div>`;
           grid.appendChild(cardUI);
-
-          // Delay lật bài tạo cảm giác mượt mà
           await new Promise((r) => setTimeout(r, 200));
           cardUI.querySelector(".card-inner").classList.add("card-flipped");
         }
 
-        const finalPrompt = `Đóng vai Tarot chuyên nghiệp, giải mã phiên của: ${data.name}
-            Câu hỏi: "${data.question}"
-            Các lá bài đã rút: ${cardsInfo}
+        if (data.aiContent) {
+          aiArea.classList.remove("hidden");
+          aiOutput.innerHTML = marked.parse(data.aiContent);
+          setTimeout(() => (aiArea.style.opacity = "1"), 100);
+          return;
+        }
 
-            YÊU CẦU PHÂN TÍCH:
+        if (apiKey) {
+          aiArea.classList.remove("hidden");
+          aiOutput.innerHTML = `<div class="py-12 text-center text-xs text-cyan-500 animate-pulse uppercase tracking-widest">Đang kết nối tinh tú...</div>`;
+          setTimeout(() => (aiArea.style.opacity = "1"), 100);
 
-            1. Đóng vai một Tarot Reader chuyên nghiệp
-            2. Phân tích CHI TIẾT từng lá bài:
-               - Ý nghĩa cơ bản của lá bài (cả xuôi/ngược)
-               - Ý nghĩa của lá bài trong ngữ cảnh câu hỏi cụ thể
-               - Mối liên hệ giữa lá bài với tình huống được hỏi
+          try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const cardsInfo = data.cards.map((c) => `${c.en} (${c.isRev ? "Ngược" : "Xuôi"})`).join(", ");
+            const finalPrompt = `Đóng vai Tarot chuyên nghiệp, giải mã phiên của: ${data.name}
+             Câu hỏi: "${data.question}"
+             Các lá bài đã rút: ${cardsInfo}
 
-            3. Phân tích tổng thể:
-               - Mối quan hệ giữa các lá bài với nhau
-               - Câu chuyện tổng thể mà bộ bài kể ra
-               - Thông điệp chính từ bộ bài
+             YÊU CẦU PHÂN TÍCH:
 
-            4. Đưa ra kết luận:
-               - Dựa HOÀN TOÀN vào ý nghĩa của các lá bài
-               - Không thêm thắt, không vẽ chuyện
-               - Trung thực, khách quan
-               - Cụ thể và chi tiết
-               - Kết nối trực tiếp với câu hỏi ban đầu
+             1. Đóng vai một Tarot Reader chuyên nghiệp
+             2. Phân tích CHI TIẾT từng lá bài:
+                - Ý nghĩa cơ bản của lá bài (cả xuôi/ngược)
+                - Ý nghĩa của lá bài trong ngữ cảnh câu hỏi cụ thể
+                - Mối liên hệ giữa lá bài với tình huống được hỏi
 
-            LƯU Ý QUAN TRỌNG:
-            - Chỉ phân tích dựa trên các lá bài đã rút và câu hỏi
-            - Không thêm thông tin ngoài hay suy diễn cá nhân
-            - Giữ tính chính xác và trung thực của Tarot
-            - Đưa ra cái nhìn sâu sắc nhưng không tiên đoán tương lai tuyệt đối
-            - Tập trung vào hướng dẫn, bài học và nhận thức`;
+             3. Phân tích tổng thể:
+                - Mối quan hệ giữa các lá bài với nhau
+                - Câu chuyện tổng thể mà bộ bài kể ra
+                - Thông điệp chính từ bộ bài
 
-        promptText.innerText = finalPrompt;
+             4. Đưa ra kết luận:
+                - Dựa HOÀN TOÀN vào ý nghĩa của các lá bài
+                - Không thêm thắt, không vẽ chuyện
+                - Trung thực, khách quan
+                - Cụ thể và chi tiết
+                - Kết nối trực tiếp với câu hỏi ban đầu
 
-        // 5. Hiển thị kết quả cuối cùng
-        setTimeout(() => {
-          promptOutput.classList.replace("opacity-0", "opacity-100");
-          window.scrollTo({ top: area.offsetTop - 50, behavior: "smooth" });
-        }, 400);
+             LƯU Ý QUAN TRỌNG:
+             - Chỉ phân tích dựa trên các lá bài đã rút và câu hỏi
+             - Không thêm thông tin ngoài hay suy diễn cá nhân
+             - Giữ tính chính xác và trung thực của Tarot
+             - Đưa ra cái nhìn sâu sắc nhưng không tiên đoán tương lai tuyệt đối
+             - Tập trung vào hướng dẫn, bài học và nhận thức`;
+
+            const result = await model.generateContent(finalPrompt);
+            const response = await result.response;
+            const text = response.text();
+
+            await typeWriter(text, aiOutput);
+
+            updateHistoryAndSave(data, text);
+            currentSessionData.aiContent = text;
+          } catch (e) {
+            aiOutput.innerHTML = `<p class="text-rose-500 text-xs">Lỗi: ${e.message}</p>`;
+          }
+        }
       }
 
-      function copyPrompt() {
-        const text = document.getElementById("promptText").innerText;
-        navigator.clipboard
-          .writeText(text)
-          .then(() => alert("Đã chép Prompt!"));
+      function updateHistoryAndSave(session, content) {
+        session.aiContent = content;
+        let h = JSON.parse(localStorage.getItem("aetheris_history") || "[]");
+        const idx = h.findIndex((s) => s.id === session.id);
+        if (idx !== -1) {
+          h[idx].aiContent = content;
+        } else {
+          h.unshift(session);
+        }
+        localStorage.setItem("aetheris_history", JSON.stringify(h.slice(0, 10)));
+        renderHistory();
+      }
+
+      window.startReading = async () => {
+        const name = document.getElementById("username").value || "Someone";
+        const question = document.getElementById("question").value;
+        const count = parseInt(document.getElementById("numCards").value);
+        if (!question) return alert("Vui lòng nhập câu hỏi!");
+
+        savePreferences();
+        const drawn = [...TAROT_DB]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, count)
+          .map((c) => ({ ...c, isRev: Math.random() > 0.7 }));
+        const session = { id: Date.now(), name, question, cards: drawn };
+
+        renderSession(session);
+      };
+
+      window.clearApiKey = () => {
+        localStorage.removeItem("gemini_api_key");
+        document.getElementById("apiKey").value = "";
+        alert("Đã xóa Key!");
+      };
+      window.regenerateAI = () => {
+        if (currentSessionData) {
+          delete currentSessionData.aiContent;
+          renderSession(currentSessionData);
+        }
+      };
+      window.deleteSession = (e, id) => {
+        e.stopPropagation();
+        let h = JSON.parse(localStorage.getItem("aetheris_history") || "[]").filter((s) => s.id !== id);
+        localStorage.setItem("aetheris_history", JSON.stringify(h));
+        renderHistory();
+      };
+      window.replaySession = (id) => {
+        const h = JSON.parse(localStorage.getItem("aetheris_history") || "[]").find((s) => s.id == id);
+        if (h) renderSession(h);
+      };
+
+      function renderHistory() {
+        const box = document.getElementById("historyBox");
+        const list = document.getElementById("historyList");
+        const h = JSON.parse(localStorage.getItem("aetheris_history") || "[]");
+        if (h.length > 0) {
+          box.classList.remove("hidden");
+          list.innerHTML = h
+            .map(
+              (s) => `
+            <div class="flex items-center bg-white/5 border border-white/5 rounded-full px-4 py-2 hover:bg-cyan-500/5 transition cursor-pointer" onclick="replaySession(${s.id})">
+              <span class="text-[10px] text-slate-300 mr-2">${s.question.substring(0, 15)}...</span>
+              <button onclick="deleteSession(event, ${s.id})" class="text-slate-500 hover:text-rose-500"><i class="fas fa-times text-[10px]"></i></button>
+            </div>`
+            )
+            .join("");
+        } else box.classList.add("hidden");
       }
     </script>
   </body>
