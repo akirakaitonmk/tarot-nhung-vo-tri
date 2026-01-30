@@ -1,0 +1,364 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap");
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.05) 0%, transparent 10%);
+    background-size: 50px 50px;
+    z-index: -1;
+}
+
+body {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    background: #020617;
+    color: #f8fafc;
+    min-height: 100vh;
+}
+
+.glass-panel {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.input-style {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-style:focus {
+    border-color: #22d3ee;
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+    transform: translateY(-1px);
+}
+
+.card-container {
+    perspective: 1500px;
+    width: 260px;
+    height: 400px;
+}
+
+.card-wrapper {
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center bottom;
+}
+
+.card-wrapper:hover {
+    transform: translateY(-8px);
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.3),
+        0 5px 25px rgba(34, 211, 238, 0.2);
+}
+
+.fade-up {
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-gradient {
+    background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-gradient::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.btn-gradient:hover::after {
+    opacity: 1;
+}
+
+.btn-gradient:hover {
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.5);
+    transform: translateY(-3px);
+}
+
+.loading-oracle {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(34, 211, 238, 0.1);
+    border-top: 2px solid #22d3ee;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.session-badge {
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.5); }
+}
+
+#aiMarkdownOutput {
+    color: #e2e8f0;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+#aiMarkdownOutput h1, #aiMarkdownOutput h2, #aiMarkdownOutput h3 {
+    color: #22d3ee;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+#aiMarkdownOutput h1 { font-size: 1.5rem; border-bottom: 1px solid rgba(34, 211, 238, 0.2); padding-bottom: 0.5rem; }
+#aiMarkdownOutput h2 { font-size: 1.25rem; }
+#aiMarkdownOutput h3 { font-size: 1.1rem; }
+
+#aiMarkdownOutput p {
+    margin-bottom: 1rem;
+}
+
+#aiMarkdownOutput ul, #aiMarkdownOutput ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+#aiMarkdownOutput li {
+    margin-bottom: 0.5rem;
+}
+
+#aiMarkdownOutput code {
+    font-family: 'Fira Code', monospace;
+    background: rgba(34, 211, 238, 0.1);
+    color: #22d3ee;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+#aiMarkdownOutput pre {
+    background: rgba(15, 23, 42, 0.8);
+    padding: 1rem;
+    border-radius: 12px;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+#aiMarkdownOutput pre code {
+    background: transparent;
+    padding: 0;
+    color: #f8fafc;
+}
+
+#aiMarkdownOutput blockquote {
+    border-left: 4px solid #22d3ee;
+    background: rgba(34, 211, 238, 0.05);
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+#aiMarkdownOutput table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#aiMarkdownOutput th, #aiMarkdownOutput td {
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+#aiMarkdownOutput th {
+    background: rgba(34, 211, 238, 0.1);
+    color: #22d3ee;
+}
+
+#aiMarkdownOutput strong {
+    color: #22d3ee;
+}
+
+.slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.shimmer-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 20%,
+        rgba(34, 211, 238, 0.1) 50%,
+        transparent 80%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(-45deg); }
+    100% { transform: translateX(100%) rotate(-45deg); }
+}
+
+.hover-effect {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(34, 211, 238, 0.1);
+}
+
+.btn-press {
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-press:active {
+    transform: scale(0.97);
+}
+
+.fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-out {
+    animation: fadeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.text-blur-in {
+    animation: textBlurIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes textBlurIn {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0);
+    }
+}
+
+.text-blur-out {
+    animation: textBlurOut 0.3s ease-out forwards;
+}
+
+@keyframes textBlurOut {
+    from {
+        opacity: 1;
+        filter: blur(0);
+    }
+    to {
+        opacity: 0;
+        filter: blur(10px);
+    }
+}
+
+@keyframes gentleShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+.animate-gentle-shake {
+    animation: gentleShake 0.3s ease-in-out;
+}
+
+.glow-border {
+    position: relative;
+}
+
+.glow-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, #22d3ee, #0ea5e9, #22d3ee);
+    background-size: 200% 200%;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.glow-border:hover::before {
+    opacity: 1;
+}
+
+.card-reveal {
+    animation: cardReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes cardReveal {
+    from {
+        opacity: 0;
+        transform: translateY(30px) rotateY(90deg);
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateY(0);
+        filter: blur(0);
+    }
+}
