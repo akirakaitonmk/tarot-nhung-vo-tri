@@ -884,24 +884,47 @@
         );
         renderHistory();
       }
+      
+      function deleteSession(event, id) {
+        // Ngăn sự kiện click lan ra nút cha (không làm trigger replaySession)
+        event.stopPropagation();
+        
+        let history = JSON.parse(
+          localStorage.getItem("aetheris_history") || "[]",
+        );
+        
+        // Lọc bỏ session có id tương ứng
+        history = history.filter(s => s.id !== id);
+        
+        // Lưu lại vào localStorage
+        localStorage.setItem("aetheris_history", JSON.stringify(history));
+        
+        // Cập nhật lại giao diện
+        renderHistory();
+      }
 
       function renderHistory() {
         const box = document.getElementById("historyBox");
         const list = document.getElementById("historyList");
-        const history = JSON.parse(
-          localStorage.getItem("aetheris_history") || "[]",
-        );
+        const history = JSON.parse(localStorage.getItem("aetheris_history") || "[]");
+        
         if (history.length > 0) {
           box.classList.remove("hidden");
-          list.innerHTML = history
-            .map(
-              (h) => `
-        <button onclick="replaySession(${h.id})" class="text-[10px] px-4 py-2 rounded-full bg-white/5 border border-white/5 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition">
-          ${h.question.substring(0, 15)}...
-        </button>
-      `,
-            )
-            .join("");
+          list.innerHTML = history.map((h) => `
+            <div class="flex items-center bg-white/5 border border-white/5 rounded-full hover:border-cyan-500/50 hover:bg-cyan-500/5 transition group overflow-hidden pr-2">
+              <button onclick="replaySession(${h.id})" class="text-[10px] pl-4 pr-2 py-2 text-slate-300 hover:text-white transition-colors">
+                ${h.question.substring(0, 15)}...
+              </button>
+              
+              <div class="w-[1px] h-3 bg-white/10 group-hover:bg-cyan-500/30"></div>
+              
+              <button onclick="deleteSession(event, ${h.id})" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-colors ml-1">
+                <i class="fas fa-times text-[10px]"></i>
+              </button>
+            </div>
+          `).join("");
+        } else {
+          box.classList.add("hidden");
         }
       }
 
