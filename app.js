@@ -237,6 +237,16 @@ window.startReading = async () => {
         return;
     }
 
+    for (let i = 0; i < 10; i++) {
+        [...TAROT_DB]
+            .sort(() => 0.5 - Math.random())
+            .slice(0, count);
+        if (i < 9) {
+            const delay = new Promise(resolve => setTimeout(resolve, 1));
+            await delay;
+        }
+    }
+    
     const drawn = [...TAROT_DB]
         .sort(() => 0.5 - Math.random())
         .slice(0, count)
@@ -340,4 +350,5 @@ window.copyResponse = () => {
         button.classList.add('animate-gentle-shake');
         setTimeout(() => button.classList.remove('animate-gentle-shake'), 300);
     });
+
 };
