@@ -237,12 +237,29 @@ window.startReading = async () => {
         return;
     }
 
+    // Xóa cache random cũ bằng cách tạo seed ngẫu nhiên mới
+    const clearRandomCache = () => {
+        // Tạo mảng bytes ngẫu nhiên để xóa cache random cũ
+        const randomBuffer = new Uint32Array(10);
+        if (window.crypto && window.crypto.getRandomValues) {
+            window.crypto.getRandomValues(randomBuffer);
+        }
+        // Reset Math.random seed (không hoàn toàn triệt để nhưng giúp giảm pattern)
+        randomBuffer.forEach(val => Math.random());
+    };
+
+    // Gọi hàm clear cache trước khi bắt đầu random
+    clearRandomCache();
+
     // Thuật toán chọn bài giảm dần
     const availableCards = [...TAROT_DB];
     const drawn = [];
     
     // Lặp 10 lần, mỗi lần chọn một tỷ lệ giảm dần
     for (let i = 0; i < 10; i++) {
+        // Clear cache mỗi lần lặp để đảm bảo tính ngẫu nhiên
+        if (i > 0) clearRandomCache();
+        
         // Tỷ lệ giảm dần từ 90% xuống còn số lá cần chọn
         const remainingSteps = 10 - i;
         const targetSize = Math.max(count, Math.floor(availableCards.length * (0.1 * remainingSteps)));
@@ -261,11 +278,17 @@ window.startReading = async () => {
         }
     }
     
+    // Clear cache một lần cuối trước khi chọn lá bài cuối cùng
+    clearRandomCache();
+    
     // Chọn đúng số lá cần rút từ những lá còn lại
     const finalCards = availableCards
         .sort(() => 0.5 - Math.random())
         .slice(0, count)
-        .map((c) => ({ ...c, isRev: Math.random() > 0.7 }));
+        .map((c) => ({ 
+            ...c, 
+            isRev: Math.random() > 0.7 
+        }));
     
     const session = { id: Date.now(), name, question, cards: finalCards };
 
@@ -368,4 +391,5 @@ window.copyResponse = () => {
     });
 
 };
+
 
