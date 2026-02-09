@@ -237,21 +237,37 @@ window.startReading = async () => {
         return;
     }
 
+    // Thuật toán chọn bài giảm dần
+    const availableCards = [...TAROT_DB];
+    const drawn = [];
+    
+    // Lặp 10 lần, mỗi lần chọn một tỷ lệ giảm dần
     for (let i = 0; i < 10; i++) {
-        [...TAROT_DB]
-            .sort(() => 0.5 - Math.random())
-            .slice(0, count);
-        if (i < 9) {
-            const delay = new Promise(resolve => setTimeout(resolve, 1));
-            await delay;
+        // Tỷ lệ giảm dần từ 90% xuống còn số lá cần chọn
+        const remainingSteps = 10 - i;
+        const targetSize = Math.max(count, Math.floor(availableCards.length * (0.1 * remainingSteps)));
+        
+        // Xáo trộn và chọn số lá theo targetSize
+        availableCards.sort(() => 0.5 - Math.random());
+        
+        // Giữ lại số lá theo targetSize
+        while (availableCards.length > targetSize) {
+            availableCards.pop();
+        }
+        
+        // Nếu đã đủ số lá cần rút, dừng lại
+        if (availableCards.length <= count) {
+            break;
         }
     }
     
-    const drawn = [...TAROT_DB]
+    // Chọn đúng số lá cần rút từ những lá còn lại
+    const finalCards = availableCards
         .sort(() => 0.5 - Math.random())
         .slice(0, count)
         .map((c) => ({ ...c, isRev: Math.random() > 0.7 }));
-    const session = { id: Date.now(), name, question, cards: drawn };
+    
+    const session = { id: Date.now(), name, question, cards: finalCards };
 
     saveSessionToHistory(session);
     
@@ -352,3 +368,4 @@ window.copyResponse = () => {
     });
 
 };
+
